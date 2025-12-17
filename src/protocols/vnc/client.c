@@ -100,6 +100,7 @@ static int guac_vnc_join_pending_handler(guac_client* client) {
 
 int guac_client_init(guac_client* client) {
 
+    guac_client_log(client, GUAC_LOG_INFO, "Initializing VNC client...");
     /* Set client args */
     client->args = GUAC_VNC_CLIENT_ARGS;
 
