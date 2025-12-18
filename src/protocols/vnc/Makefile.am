@@ -38,9 +38,10 @@ libguac_client_vnc_la_SOURCES = \
     input.c                     \
     log.c                       \
     settings.c                  \
+    proxmox.c                   \
     user.c                      \
     vnc.c
-    
+
 noinst_HEADERS =      \
     argv.h            \
     auth.h            \
@@ -51,6 +52,7 @@ noinst_HEADERS =      \
     input.h           \
     log.h             \
     settings.h        \
+    proxmox.h         \
     user.h            \
     vnc.h
 
@@ -64,11 +66,12 @@ libguac_client_vnc_la_CFLAGS =        \
 libguac_client_vnc_la_LDFLAGS = \
     -version-info 0:0:0         \
     @CAIRO_LIBS@                \
-    @VNC_LIBS@ 
+    @VNC_LIBS@
 
 libguac_client_vnc_la_LIBADD = \
     @COMMON_LTLIB@             \
     @LIBGUAC_LTLIB@
+    -lcurl
 
 # Optional SFTP support
 if ENABLE_COMMON_SSH
@@ -81,4 +84,3 @@ endif
 if ENABLE_PULSE
 libguac_client_vnc_la_LIBADD += @PULSE_LTLIB@
 endif
-

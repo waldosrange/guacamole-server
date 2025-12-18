@@ -27,6 +27,7 @@
 #include "display.h"
 #include "log.h"
 #include "settings.h"
+#include "proxmox.h"
 #include "vnc.h"
 
 #ifdef ENABLE_PULSE
@@ -73,7 +74,7 @@ char* GUAC_VNC_CLIENT_KEY = "GUAC_VNC";
  * A callback function that is called by the VNC library prior to writing
  * data to a TLS-encrypted socket.  This returns the rfbBool FALSE value
  * if there's an error locking the mutex, or rfbBool TRUE otherwise.
- * 
+ *
  * @param rfb_client
  *     The rfbClient for which to lock the TLS mutex.
  *
@@ -147,12 +148,12 @@ rfbClient* guac_vnc_get_client(guac_client* client) {
     rfb_client->LockWriteToTLS = guac_vnc_lock_write_to_tls;
     rfb_client->UnlockWriteToTLS = guac_vnc_unlock_write_to_tls;
 #endif
-    
+
 #ifdef LIBVNCSERVER_WITH_CLIENT_GCRYPT
-    
+
     /* Check if GCrypt is initialized, do it if not. */
     if (!gcry_control(GCRYCTL_INITIALIZATION_FINISHED_P)) {
-    
+
         guac_client_log(client, GUAC_LOG_DEBUG, "GCrypt initialization started.");
 
         /* Initialize thread control. */
@@ -164,9 +165,9 @@ rfbClient* guac_vnc_get_client(guac_client* client) {
         /* Mark initialization as completed. */
         gcry_control(GCRYCTL_INITIALIZATION_FINISHED, 0);
         guac_client_log(client, GUAC_LOG_DEBUG, "GCrypt initialization completed.");
-    
+
     }
-    
+
 #endif
 
     /* Do not handle clipboard and local cursor if read-only */
@@ -192,7 +193,7 @@ rfbClient* guac_vnc_get_client(guac_client* client) {
     /* Authentication */
     rfb_client->GetCredential = guac_vnc_get_credentials;
 #endif
-    
+
     /* Password */
     rfb_client->GetPassword = guac_vnc_get_password;
 
@@ -314,7 +315,7 @@ static rfbBool guac_vnc_handle_messages(guac_client* client) {
 
 #ifdef LIBVNC_HAS_RESIZE_SUPPORT
     // If screen was not previously initialized, check for it and set it.
-    if (!vnc_client->rfb_screen_initialized 
+    if (!vnc_client->rfb_screen_initialized
             && rfb_client->screen.width > 0
             && rfb_client->screen.height > 0) {
         vnc_client->rfb_screen_initialized = true;
@@ -397,7 +398,15 @@ void* guac_vnc_client_thread(void* data) {
             return NULL;
         }
     }
-    
+
+    /*If proxmox proxy is configured, call the proxmox api*/
+    if (settings->proxmox_vnc_proxy != NULL) {
+        if (guac_vnc_proxmox_set_password(client)) {
+            guac_client_log(client, GUAC_LOG_ERROR, "Failed to connect via Proxmox VNC proxy.");
+            return NULL;
+        }
+    }
+
     /* Configure clipboard encoding */
     if (guac_vnc_set_clipboard_encoding(client, settings->clipboard_encoding)) {
         guac_client_log(client, GUAC_LOG_INFO, "Using non-standard VNC "
@@ -436,7 +445,7 @@ void* guac_vnc_client_thread(void* data) {
 #ifdef ENABLE_PULSE
     /* If audio is enabled, start streaming via PulseAudio */
     if (settings->audio_enabled)
-        vnc_client->audio = guac_pa_stream_alloc(client, 
+        vnc_client->audio = guac_pa_stream_alloc(client,
                 settings->pa_servername);
 #endif
 
