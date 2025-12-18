@@ -70,8 +70,8 @@ libguac_client_vnc_la_LDFLAGS = \
 
 libguac_client_vnc_la_LIBADD = \
     @COMMON_LTLIB@             \
-    @LIBGUAC_LTLIB@
-    -lcurl
+    @LIBGUAC_LTLIB@            \
+    -lssl -lcrypto
 
 # Optional SFTP support
 if ENABLE_COMMON_SSH
