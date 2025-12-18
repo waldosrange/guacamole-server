@@ -319,6 +319,41 @@ typedef struct guac_vnc_settings {
     bool proxmox_vnc_proxy;
 
     /**
+     * The Proxmox host to connect to for VNC proxying.
+     */
+    char* proxmox_host;
+
+    /**
+     * The Proxmox user to authenticate as for VNC proxying.
+     */
+    char* proxmox_user;
+
+    /**
+     * The Proxmox password to authenticate with for VNC proxying.
+     */
+    char* proxmox_password;
+
+    /**
+     * The Proxmox token name to authenticate with for VNC proxying.
+     */
+    char* proxmox_token_name;
+
+    /**
+     * The Proxmox token value to authenticate with for VNC proxying.
+     */
+    char* proxmox_token_value;
+
+    /**
+     * The Proxmox node where the VM is located for VNC proxying.
+     */
+    char* proxmox_node;
+
+    /**
+     * The Proxmox VM ID to connect to for VNC proxying.
+     */
+    char* proxmox_vm_id;
+
+    /**
      * Whether or not to send the magic Wake-on-LAN (WoL) packet prior to
      * trying to connect to the remote host.  By default this will not be sent.
      * If this option is enabled but a MAC address is not provided a warning will
@@ -392,4 +427,3 @@ void guac_vnc_settings_free(guac_vnc_settings* settings);
 extern const char* GUAC_VNC_CLIENT_ARGS[];
 
 #endif
-

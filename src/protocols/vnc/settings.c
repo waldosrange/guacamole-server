@@ -93,6 +93,13 @@ const char* GUAC_VNC_CLIENT_ARGS[] = {
     "disable-server-input",
 
     "proxmox-vnc-proxy",
+    "proxmox-host",
+    "proxmox-user",
+    "proxmox-password",
+    "proxmox-token-name",
+    "proxmox-token-value",
+    "proxmox-node",
+    "proxmox-vm-id",
 
     "wol-send-packet",
     "wol-mac-addr",
@@ -391,6 +398,34 @@ enum VNC_ARGS_IDX {
      * By default the api will not be called.
      */
     IDX_PROXMOX_VNC_PROXY,
+    /**
+     * The Proxmox host to connect to for VNC proxying.
+     */
+    IDX_PROXMOX_HOST,
+    /**
+     * The Proxmox user to authenticate as for VNC proxying.
+     */
+    IDX_PROXMOX_USER,
+    /**
+     * The Proxmox password to authenticate with for VNC proxying.
+     */
+    IDX_PROXMOX_PASSWORD,
+    /**
+     * The Proxmox token name to authenticate with for VNC proxying.
+     */
+    IDX_PROXMOX_TOKEN_NAME,
+    /**
+     * The Proxmox token value to authenticate with for VNC proxying.
+     */
+    IDX_PROXMOX_TOKEN_VALUE,
+    /**
+     * The Proxmox node where the VM is located for VNC proxying.
+     */
+    IDX_PROXMOX_NODE,
+    /**
+     * The Proxmox VM ID to connect to for VNC proxying.
+     */
+    IDX_PROXMOX_VM_ID,
 
     /**
      * Whether to send the magic Wake-on-LAN (WoL) packet to wake the remote
@@ -704,6 +739,37 @@ guac_vnc_settings* guac_vnc_parse_args(guac_user* user,
                 IDX_PROXMOX_VNC_PROXY, false);
     guac_user_log(user, GUAC_LOG_INFO, "Proxmox VNC Proxy: %d", settings->proxmox_vnc_proxy);
 
+    if (settings->proxmox_vnc_proxy) {
+        /*If Proxmox proxy has been enabled but no host is provided, log warning and disable*/
+        if(strcmp(argv[IDX_PROXMOX_HOST], "") == 0) {
+            guac_user_log(user, GUAC_LOG_WARNING, "Proxmox VNC proxy was requested, ",
+                    "but no Proxmox host was specified.  Proxmox VNC proxy will not be used.");
+            settings->proxmox_vnc_proxy = false;
+        }
+        settings->proxmox_host =
+        guac_user_parse_args_string(user, GUAC_VNC_CLIENT_ARGS, argv,
+                IDX_PROXMOX_HOST, NULL);
+        settings->proxmox_user =
+            guac_user_parse_args_string(user, GUAC_VNC_CLIENT_ARGS, argv,
+                    IDX_PROXMOX_USER, NULL);
+        settings->proxmox_password =
+            guac_user_parse_args_string(user, GUAC_VNC_CLIENT_ARGS, argv,
+                    IDX_PROXMOX_PASSWORD, NULL);
+        settings->proxmox_token_name =
+            guac_user_parse_args_string(user, GUAC_VNC_CLIENT_ARGS, argv,
+                    IDX_PROXMOX_TOKEN_NAME, NULL);
+        settings->proxmox_token_value =
+            guac_user_parse_args_string(user, GUAC_VNC_CLIENT_ARGS, argv,
+                    IDX_PROXMOX_TOKEN_VALUE, NULL);
+        settings->proxmox_node =
+            guac_user_parse_args_string(user, GUAC_VNC_CLIENT_ARGS, argv,
+                    IDX_PROXMOX_NODE, NULL);
+        settings->proxmox_vm_id =
+            guac_user_parse_args_string(user, GUAC_VNC_CLIENT_ARGS, argv,
+                    IDX_PROXMOX_VM_ID, NULL);
+    }
+
+
     /* Parse Wake-on-LAN (WoL) settings */
     settings->wol_send_packet =
         guac_user_parse_args_boolean(user, GUAC_VNC_CLIENT_ARGS, argv,
@@ -779,6 +845,15 @@ void guac_vnc_settings_free(guac_vnc_settings* settings) {
     guac_mem_free(settings->pa_servername);
 #endif
 
+    /*Free Proxmox VNC settings*/
+    guac_mem_free(settings->proxmox_host);
+    guac_mem_free(settings->proxmox_user);
+    guac_mem_free(settings->proxmox_password);
+    guac_mem_free(settings->proxmox_token_name);
+    guac_mem_free(settings->proxmox_token_value);
+    guac_mem_free(settings->proxmox_node);
+    guac_mem_free(settings->proxmox_vm_id);
+
     /* Free Wake-on-LAN strings */
     guac_mem_free(settings->wol_mac_addr);
     guac_mem_free(settings->wol_broadcast_addr);
@@ -787,4 +862,3 @@ void guac_vnc_settings_free(guac_vnc_settings* settings) {
     guac_mem_free(settings);
 
 }
-
