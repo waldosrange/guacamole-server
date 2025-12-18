@@ -227,4 +227,3 @@ int guac_vnc_client_free_handler(guac_client* client) {
 
     return 0;
 }
-
