@@ -400,8 +400,8 @@ void* guac_vnc_client_thread(void* data) {
     }
 
     /*If proxmox proxy is configured, call the proxmox api*/
-    if (settings->proxmox_vnc_proxy != NULL) {
-        if (guac_vnc_proxmox_set_password(client)) {
+    if (settings->proxmox_vnc_proxy) {
+        if (guac_vnc_proxmox_start_proxy(client)) {
             guac_client_log(client, GUAC_LOG_ERROR, "Failed to connect via Proxmox VNC proxy.");
             return NULL;
         }
