@@ -26,7 +26,7 @@ extern "C" {
  *     Zero on success (settings->password has been set), non-zero on
  *     failure.
  */
-int guac_vnc_proxmox_set_password(guac_client* client);
+int guac_vnc_proxmox_start_proxy(guac_client* client);
 
 #ifdef __cplusplus
 }

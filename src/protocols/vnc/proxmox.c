@@ -85,7 +85,7 @@ static char* ssl_read_all(guac_client* client, SSL* ssl) {
                 break;
             } else {
                 /* Other error - log and break */
-                guac_client_log(client, GUAC_LOG_WARN, "SSL_read error: %d", err);
+                guac_client_log(client, GUAC_LOG_WARNING, "SSL_read error: %d", err);
                 break;
             }
         }
@@ -265,7 +265,7 @@ int guac_vnc_proxmox_start_proxy(guac_client* client) {
     if (body) body += 4; else body = resp;
 
     /* Parse ticket from response */
-    char* ticket = parse_json_string(body, "\"ticket\"", client);
+    char* ticket = parse_json_string(body, "\"ticket\"");
     if (!ticket) {
         guac_client_log(client, GUAC_LOG_ERROR, "Proxmox API response did not contain ticket.");
         free(resp); SSL_shutdown(ssl); SSL_free(ssl); close(sock); free(host); free(port); SSL_CTX_free(ctx);
@@ -273,7 +273,7 @@ int guac_vnc_proxmox_start_proxy(guac_client* client) {
     }
 
     /* Parse port from response */
-    char* port_str = parse_json_string(body, "\"port\"", client);
+    char* port_str = parse_json_string(body, "\"port\"");
     if (!port_str) {
         guac_client_log(client, GUAC_LOG_ERROR, "Proxmox API response did not contain port.");
         free(resp); SSL_shutdown(ssl); SSL_free(ssl); close(sock); free(host); free(port); SSL_CTX_free(ctx);
